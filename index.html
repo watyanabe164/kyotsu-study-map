@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>共通テスト80%突破への冒険マップ (アドオン拡張版)</title>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&family=M+PLUS+Rounded+1c:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f6f8fa;
+  --bg2: #ffffff;
+  --bg3: #f0f3f6;
+  --border: #e1e4e6;
+  --border2: #d0d7de;
+  --text: #24292f;
+  --text2: #57606a;
+  --text3: #8c959f;
+  --purple: #4f46e5;
+  --purple2: #6366f1;
+  --purple-bg: rgba(79, 70, 229, 0.08);
+  --purple-border: rgba(79, 70, 229, 0.25);
+  --green: #0f766e;
+  --green-bg: #e6f6f4;
+  --amber: #b45309;
+  --amber-bg: #fef3c7;
+  --font: 'Zen Maru Gothic', sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh}
+.app{max-width:920px;margin:0 auto;padding:1.5rem 1rem 4rem}
+
+/* TOP BAR */
+.topbar{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:1.25rem 1.5rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:1.25rem;flex-wrap:wrap;box-shadow:0 4px 12px rgba(0,0,0,0.03)}
+.av{width:56px;height:56px;border-radius:50%;background:var(--purple-bg);border:1.5px solid var(--purple-border);display:flex;align-items:center;justify-content:center;font-size:26px}
+.hero-info{flex:1;min-width:180px}
+.hero-name{font-size:16px;font-weight:700}
+.hero-class{font-size:11px;color:var(--purple);margin-bottom:6px;font-weight:700}
+.lv-row{display:flex;align-items:center;gap:8px}
+.lv-badge{background:var(--purple-bg);border:1px solid var(--purple-border);color:var(--purple);font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px}
+.exp-bar{flex:1;height:6px;background:var(--bg3);border-radius:3px;overflow:hidden}
+.exp-fill{height:100%;background:var(--purple);transition:width .5s ease}
+.exp-label{font-size:10px;color:var(--text2)}
+.subj-pills{display:flex;gap:6px;flex-wrap:wrap;max-width:450px}
+.subj-pill{background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:3px 10px;font-size:11px;color:var(--text2)}
+.subj-pill b{color:var(--text);font-weight:700}
+
+/* NAV TABS */
+.tabs{display:flex;gap:4px;margin-bottom:1.25rem;background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:4px}
+.tab{flex:1;padding:10px;font-size:13px;font-family:var(--font);border:none;background:transparent;color:var(--text2);border-radius:8px;cursor:pointer;font-weight:700}
+.tab.active{background:var(--bg2);color:var(--purple);border:1px solid var(--border);box-shadow:0 2px 6px rgba(0,0,0,0.04)}
+
+/* MAP VIEW */
+.subj-section{margin-bottom:1.5rem}
+.sh{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.sh-name{font-size:13px;font-weight:700}
+.sh-progress{font-size:11px;color:var(--text2)}
+.sh-line{flex:1;height:1px;background:var(--border)}
+.units-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}
+.uc{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:1rem;cursor:pointer;transition:all .2s;position:relative}
+.uc:hover{border-color:var(--border2);transform:translateY(-1px);box-shadow:0 4px 8px rgba(0,0,0,0.04)}
+.uc.cleared{border-color:#6ee7b7;background:#f0fdf4}
+.uc.partial{border-color:#fde68a;background:#fffbec}
+.uc-name{font-size:13px;font-weight:700;margin-bottom:4px;line-height:1.4}
+.uc-meta{font-size:10px;color:var(--text2)}
+.uc-status{font-size:11px;margin-top:6px;font-weight:700}
+.uc.cleared .uc-status{color:#16a34a}
+.uc.partial .uc-status{color:#d97706}
+.uc-bar{height:4px;background:var(--bg3);border-radius:2px;margin-top:6px;overflow:hidden}
+.uc-bar-fill{height:100%;border-radius:2px}
+.uc.cleared .uc-bar-fill{background:#16a34a}
+.uc.partial .uc-bar-fill{background:#d97706}
+.uc:not(.cleared):not(.partial) .uc-bar-fill{background:var(--text3)}
+
+/* QUIZ VIEW */
+.quiz-card{background:var(--bg2);border:1px solid var(--border2);border-radius:16px;padding:1.75rem;box-shadow:0 4px 16px rgba(0,0,0,0.02)}
+.qh{display:flex;justify-content:space-between;align-items:center;margin-bottom:.875rem}
+.qtitle{font-size:14px;font-weight:700;color:var(--purple)}
+.qprog{font-size:12px;color:var(--text2)}
+.qpb{height:4px;background:var(--bg3);border-radius:2px;margin-bottom:1.5rem;overflow:hidden}
+.qpf{height:100%;background:var(--purple);transition:width .3s}
+.qtext{font-size:16px;font-weight:700;line-height:1.7;margin-bottom:1rem;white-space:pre-wrap}
+.qhint{font-size:12px;color:var(--amber);margin-bottom:1.25rem;padding:10px 14px;background:var(--amber-bg);border-radius:8px;border-left:3px solid #d97706}
+.choices{display:flex;flex-direction:column;gap:10px;margin-bottom:1.25rem}
+.cb{background:var(--bg2);border:1px solid var(--border2);border-radius:10px;padding:14px 16px;cursor:pointer;text-align:left;font-size:14px;font-family:var(--font);font-weight:700}
+.cb:hover:not(:disabled){border-color:var(--purple);background:var(--purple-bg)}
+.cb.ok{background:#f0fdf4;border-color:#22c55e;color:#15803d}
+.cb.ng{background:#fef2f2;border-color:#ef4444;color:#b91c1c}
+.fb{padding:14px 16px;border-radius:10px;font-size:13px;margin-bottom:1.25rem;display:none;line-height:1.65;white-space:pre-wrap}
+.fb.show{display:block}
+.fb.fok{background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0}
+.fb.fng{background:#fef2f2;color:#dc2626;border:1px solid #fecaca}
+.nb{display:none;padding:12px 24px;font-size:14px;border:none;border-radius:10px;background:var(--purple);color:#fff;cursor:pointer;font-weight:700}
+.nb.show{display:inline-block}
+
+/* RESULT VIEW */
+.rpanel{background:var(--bg2);border:1px solid var(--border2);border-radius:16px;padding:3rem 2rem;text-align:center}
+.rscore{font-size:46px;font-weight:700;margin:.5rem 0}
+.rmsg{font-size:14px;color:var(--text2);margin-bottom:1.5rem}
+.rbadge{display:inline-block;border-radius:20px;padding:6px 20px;font-size:13px;font-weight:700;margin-bottom:1.5rem}
+.rbadge.pass{background:#e0f2fe;color:#0369a1;border:1px solid #bae6fd}
+.rbadge.fail{background:#fef3c7;color:#b45309;border:1px solid #fde68a}
+.brow{display:flex;gap:10px;justify-content:center}
+.ab{padding:10px 20px;font-size:13px;border:1px solid var(--border2);border-radius:10px;background:var(--bg2);color:var(--text2);cursor:pointer;font-weight:700}
+.ab.primary{border-color:var(--purple);color:#fff;background:var(--purple)}
+
+/* DEV PANEL (ADD-ON SYSTEM) */
+.dev-panel{margin-top:3rem;background:#fff;border:2px dashed var(--border2);border-radius:16px;padding:1.5rem}
+.dev-title{font-size:15px;font-weight:700;color:var(--purple);margin-bottom:0.5rem;display:flex;align-items:center;gap:6px}
+.dev-desc{font-size:12px;color:var(--text2);margin-bottom:1rem;line-height:1.5}
+.dev-textarea{width:100%;height:120px;font-family:monospace;font-size:12px;padding:10px;border:1px solid var(--border2);border-radius:8px;background:#fafafa;resize:vertical;margin-bottom:10px}
+.dev-btns{display:flex;gap:10px;margin-bottom:1rem;flex-wrap:wrap}
+.btn-sm{padding:6px 12px;font-size:12px;font-weight:700;border:1px solid var(--border2);border-radius:6px;background:#fff;cursor:pointer}
+.btn-sm.primary{background:var(--purple);color:#fff;border-color:var(--purple)}
+.unit-list-box{background:var(--bg3);padding:10px;border-radius:8px;font-size:11px;max-height:150px;overflow-y:auto;font-family:monospace;white-space:pre-wrap}
+
+.hidden{display:none}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="av">🎓</div>
+  <div class="hero-info">
+    <div class="hero-name">受験チャレンジャー</div>
+    <div class="hero-class" id="cls">E判定の迷い人</div>
+    <div class="lv-row">
+      <div class="lv-badge">Lv.<span id="lvn">1</span></div>
+      <div class="exp-bar"><div class="exp-fill" id="efill" style="width:0%"></div></div>
+      <div class="exp-label"><span id="expt">0/100 EXP</span></div>
+    </div>
+  </div>
+  <div class="subj-pills" id="pills-box"></div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('map')">🗺 共テ攻略マップ</button>
+  <button class="tab" onclick="switchTab('history')">📅 演習の軌跡</button>
+  <button class="tab" onclick="switchTab('growth')">📈 習熟度グラフ</button>
+</div>
+
+<div id="tab-map">
+  <div id="home-view"></div>
+  <div id="quiz-view" class="hidden">
+    <div class="quiz-card">
+      <div class="qh"><div class="qtitle" id="qtitle"></div><div class="qprog" id="qprog"></div></div>
+      <div class="qpb"><div class="qpf" id="qbar"></div></div>
+      <div class="qtext" id="qtext"></div>
+      <div class="qhint" id="qhint"></div>
+      <div class="choices" id="qchoices"></div>
+      <div class="fb" id="qfb"></div>
+      <button class="nb" id="nxtbtn" onclick="nextQ()">次の考察へ →</button>
+    </div>
+  </div>
+  <div id="result-view" class="hidden">
+    <div class="rpanel">
+      <div style="font-size:24px;margin-bottom:4px" id="rico"></div>
+      <div style="font-size:15px;font-weight:700" id="rtitle"></div>
+      <div class="rscore" id="rscore"></div>
+      <div class="rmsg" id="rmsg"></div>
+      <div class="rbadge" id="rbadge"></div>
+      <div class="brow">
+        <button class="ab" onclick="retry()">再挑戦</button>
+        <button class="ab primary" onclick="goHome()">マップに戻る</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="tab-history" class="hidden"><div style="padding:2rem;text-align:center;color:var(--text3)">履歴機能（簡易表示）</div></div>
+<div id="tab-growth" class="hidden"><div id="growth-content"></div></div>
+
+<!-- DEV PANEL (ADD-ON SYSTEM) -->
+<div class="dev-panel">
+  <div class="dev-title">⚙️ AIアドオン・データ管理システム</div>
+  <div class="dev-desc">
+    現在の登録単元リストは以下の通りです。このリストを元にGeminiに「問題集の追加」を依頼できます。<br>
+    下のボタンでプロンプトをコピーし、生成されたJSONデータをテキストエリアに貼り付けて「アドオンを適用する」を押してください。
+  </div>
+  
+  <div style="margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+    <span style="font-size: 12px; font-weight: 700; color: var(--text2);">目標レベルの設定:</span>
+    <input type="text" id="target-level" value="80%突破レベル（標準）" style="flex: 1; max-width: 300px; padding: 6px 10px; font-family: var(--font); font-size: 12px; border: 1px solid var(--border2); border-radius: 6px; background: #fff; color: var(--text);">
+  </div>
+
+  <div class="dev-btns">
+    <button class="btn-sm primary" onclick="copyPrompt(document.getElementById('target-level').value)">📋 Gemini用プロンプトをコピー</button>
+    <button class="btn-sm" style="color:red;border-color:#fca5a5" onclick="resetAllData()">⚠️ データを初期化する</button>
+  </div>
+  <textarea class="dev-textarea" id="dev-input" placeholder='ここにGeminiが生成した追加用JSONデータを貼り付けます...'></textarea>
+  <div class="dev-btns">
+    <button class="btn-sm primary" onclick="importAddon()">⚡ アドオンを適用する（データをマージ）</button>
+  </div>
+  <div style="font-size:12px;font-weight:700;margin-bottom:4px">現在登録されている全単元ID一覧:</div>
+  <div class="unit-list-box" id="dev-unit-list"></div>
+</div>
+
+</div>
+
+<script>
+const CLASSES=['E判定の迷い人','D判定の追跡者','C判定の開拓者','B判定の猛者','A判定の独走者','共通テストの覇者'];
+const EXP_MAX=100;
+
+// 初期デフォルト問題データ（ここをベースに拡張可能）
+const DEFAULT_DATA=[
+  {subj:'数学Ⅰ・A',sid:'m1a',icon:'📐',units:[
+    {id:'m1a-1',name:'数と式・論理と集合',qs:[
+      {q:'実数 x に関する条件\n p: |x - 2| < 3\n q: -1 < x < 5\nであるとき、p は q であるための何条件か。',h:'絶対値の不等式を外して範囲を比較。',cs:['必要十分条件','必要条件であるが十分条件ではない','十分条件であるが必要条件ではない','必要条件でも十分条件でもない'],a:0,e:'|x - 2| < 3 を解くと -1 < x < 5 となり、qと完全に一致するため必要十分条件です。'}
+    ]}
+  ]},
+  {subj:'英語R',sid:'engr',icon:'📘',units:[
+    {id:'engr-1',name:'Fact & Opinion の識別',qs:[
+      {q:'次のうち、本文に基づく「Opinion（意見）」に該当するものはどれか。\n1. The museum was built in 1925.\n2. The exhibition provides a wonderful experience.',h:'主観的な形容詞が含まれているものを探そう。',cs:['2. The exhibition provides a wonderful experience.','1. The museum was built in 1925.'],a:0,e:'「wonderful」という主観的な評価が含まれているためOpinionになります。'}
+    ]}
+  ]}
+];
+
+// 状態管理（LocalStorage）
+let st=JSON.parse(localStorage.getItem('kyotsu80_state_v2'))||{lv:1,exp:0,scores:{},history:[]};
+let appData=JSON.parse(localStorage.getItem('kyotsu80_addons_v2'))||DEFAULT_DATA;
+
+let curUnit=null,curQIdx=0,curScore=0,answered=false;
+
+function saveState(){
+  localStorage.setItem('kyotsu80_state_v2',JSON.stringify(st));
+  localStorage.setItem('kyotsu80_addons_v2',JSON.stringify(appData));
+}
+
+function updateBar(){
+  document.getElementById('lvn').textContent=st.lv;
+  document.getElementById('expt').textContent=st.exp+'/'+EXP_MAX+' EXP';
+  document.getElementById('efill').style.width=Math.round((st.exp/EXP_MAX)*100)+'%';
+  document.getElementById('cls').textContent=CLASSES[Math.min(st.lv-1,CLASSES.length-1)];
+  
+  const pBox=document.getElementById('pills-box');
+  pBox.innerHTML='';
+  appData.forEach(subj=>{
+    const scores=subj.units.map(u=>st.scores[u.id]).filter(s=>s!==undefined);
+    const avg=scores.length===0?'--':Math.round(scores.reduce((a,b)=>a+b,0)/scores.length*100)+'%';
+    pBox.innerHTML+=`<div class="subj-pill">${subj.subj} <b>${avg}</b></div>`;
+  });
+
+  // 管理パネルの単元リスト更新
+  const uList=document.getElementById('dev-unit-list');
+  let txt='';
+  appData.forEach(s=>{
+    txt+=`【${s.subj} (sid: ${s.sid})】\n`;
+    s.units.forEach(u=>{
+      txt+=`  - 単元ID: ${u.id} | 名称: ${u.name} (${u.qs.length}問登録済)\n`;
+    });
+  });
+  uList.textContent=txt||'なし';
+}
+
+function switchTab(tab){
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',['map','history','growth'][i]===tab));
+  document.getElementById('tab-map').classList.toggle('hidden',tab!=='map');
+  document.getElementById('tab-history').classList.toggle('hidden',tab!=='history');
+  document.getElementById('tab-growth').classList.toggle('hidden',tab!=='growth');
+  if(tab==='growth') renderGrowth();
+}
+
+function renderHome(){
+  showPanel('home-view');
+  const hv=document.getElementById('home-view');
+  hv.innerHTML='';
+  appData.forEach(subj=>{
+    const done=subj.units.filter(u=>(st.scores[u.id]||0)>=0.8).length;
+    const sec=document.createElement('div');
+    sec.className='subj-section';
+    sec.innerHTML=`<div class="sh"><span class="sh-name">${subj.icon} ${subj.subj}</span> <span class="sh-progress">${done}/${subj.units.length} 突破</span><div class="sh-line"></div></div><div class="units-grid"></div>`;
+    hv.appendChild(sec);
+    const ug=sec.querySelector('.units-grid');
+    subj.units.forEach(u=>{
+      const sc=st.scores[u.id];
+      const cls=sc===undefined?'':sc>=0.8?'cleared':'partial';
+      const pct=sc!==undefined?Math.round(sc*100):0;
+      const div=document.createElement('div');
+      div.className='uc '+cls;
+      div.innerHTML=`<div class="uc-name">${u.name}</div><div class="uc-meta">${u.qs.length} 考察</div><div class="uc-status">${sc===undefined?'未着手':sc>=0.8?'✓ 突破':'△ 演習不足'} ${sc!==undefined?pct+'%':''}</div><div class="uc-bar"><div class="uc-bar-fill" style="width:${pct}%"></div></div>`;
+      div.onclick=()=>startQuiz(subj.sid,u.id);
+      ug.appendChild(div);
+    });
+  });
+  updateBar();
+}
+
+function startQuiz(sid,uid){
+  const subj=appData.find(s=>s.sid===sid);
+  curUnit=subj.units.find(u=>u.id===uid);
+  curQIdx=0;curScore=0;answered=false;
+  showPanel('quiz-view');renderQ();
+}
+
+function renderQ(){
+  const q=curUnit.qs[curQIdx],tot=curUnit.qs.length;
+  document.getElementById('qtitle').textContent=curUnit.name;
+  document.getElementById('qprog').textContent=(curQIdx+1)+' / '+tot;
+  document.getElementById('qbar').style.width=Math.round((curQIdx/tot)*100)+'%';
+  document.getElementById('qtext').textContent=q.q;
+  document.getElementById('qhint').textContent='💡 視点: '+q.h;
+  const cf=document.getElementById('qchoices');cf.innerHTML='';
+  q.cs.forEach((c,i)=>{
+    const b=document.createElement('button');b.className='cb';b.textContent=c;
+    b.onclick=()=>answerQ(i,b,q);cf.appendChild(b);
+  });
+  document.getElementById('qfb').className='fb';
+  document.getElementById('nxtbtn').className='nb';
+  answered=false;
+}
+
+function answerQ(idx,btn,q){
+  if(answered)return;answered=true;
+  document.querySelectorAll('.cb').forEach(b=>b.disabled=true);
+  const ok=idx===q.a;if(ok)curScore++;
+  else{btn.classList.add('ng');document.querySelectorAll('.cb')[q.a].classList.add('ok');}
+  if(ok)btn.classList.add('ok');
+  const fb=document.getElementById('qfb');
+  fb.textContent=(ok?'✓ 正解 ':'✗ 不正解\n\n')+'【解説】\n'+q.e;
+  fb.className='fb show '+(ok?'fok':'fng');
+  document.getElementById('nxtbtn').className='nb show';
+}
+
+function nextQ(){
+  curQIdx++;
+  if(curQIdx>=curUnit.qs.length){showResult();return;}
+  renderQ();
+}
+
+function showResult(){
+  const tot=curUnit.qs.length,pct=Math.round((curScore/tot)*100),pass=pct>=80;
+  const prev=st.scores[curUnit.id];
+  if(prev===undefined||pct/100>prev)st.scores[curUnit.id]=pct/100;
+  if(pass){st.exp+=pct;while(st.exp>=EXP_MAX&&st.lv<6){st.exp-=EXP_MAX;st.lv++;}}
+  saveState();updateBar();
+  document.getElementById('rico').textContent=pass?'🎯':'🔥';
+  document.getElementById('rtitle').textContent=curUnit.name+' 結果';
+  document.getElementById('rscore').textContent=pct+'%';
+  document.getElementById('rmsg').textContent=pass?'80%突破！':'目標未到達。再挑戦しましょう。';
+  const rb=document.getElementById('rbadge');
+  rb.textContent=pass?'突破完了':'リトライ推奨';
+  rb.className='rbadge '+(pass?'pass':'fail');
+  showPanel('result-view');
+}
+
+function retry(){curQIdx=0;curScore=0;answered=false;showPanel('quiz-view');renderQ();}
+function goHome(){renderHome();}
+function showPanel(id){['home-view','quiz-view','result-view'].forEach(v=>document.getElementById(v).classList.toggle('hidden',v!==id));}
+
+function renderGrowth(){
+  const el=document.getElementById('growth-content');
+  el.innerHTML=`<div style="padding:1.5rem; background:#fff; border-radius:12px; border:1px solid var(--border)">
+    <h3 style="font-size:14px; margin-bottom:10px;">現在のアドオン状況</h3>
+    <p style="font-size:12px; color:var(--text2)">総登録科目数: ${appData.length} 科目<br>総登録単元数: ${appData.reduce((acc,s)=>acc+s.units.length,0)} セクション</p>
+  </div>`;
+}
+
+// --- ADD-ON SYSTEM LOGIC ---
+
+function copyPrompt(level) {
+  const currentStructure = appData.map(s => {
+    return `科目名: ${s.subj} (sid: "${s.sid}")\n` + s.units.map(u => `  - 既存単元ID: "${u.id}" (名称: ${u.name})`).join('\n');
+  }).join('\n\n');
+
+  const promptText = `あなたは共通テスト対策の専門AIプログラマです。
+下記の学習アプリ用オブジェクト構造（JSON形式）を拡張するための、追加用問題データを作成してください。
+ただし、AIの出力トークン上限によるJSON崩れを防ぐため、今回は**【指定する科目】のみ**に絞って作成してください。残りの科目は次回以降、別スレッドで順番に依頼します。
+
+■ 目標レベル: ${level}
+■ 今回の指定科目・単元：
+・数学Ⅰ・A
+・情報Ⅰ
+■ 現在のアプリ構造：
+${currentStructure}
+
+■ 依頼タスク：
+1. 上記の既存科目に新しい「単元（unit）」を追加するか、あるいは全く新しい「科目（subj）」を新設してください。
+2. 科目が指定された場合、科目に紐づく全単元を網羅的に出題してください。
+3. 単元が重複する場合は、"20260531追加版"として重複を避けるようにしてください。
+4. 追加する単元には、共通テスト形式の4択問題を最低10問以上含めてください。
+5. 必ず以下の【出力フォーマット】（JSON配列）の形式のみを出力してください。余計な挨拶やMarkdownの解説文は一切不要です。コードブロックも不要です。
+6. 解説文（e）の末尾には、必ず「問題掘り下げ用プロンプト」「単元掘り下げ用プロンプト」の2つを含めてください。
+7. JSONの文字列内部でダブルクォーテーションや特殊文字（\）を使用する場合は、必ず \" や \\n のように適切にエスケープ処理を行ってください。
+8. 出力はコードブロック（json ... ）を使用せず、純粋なJSON配列のテキストのみを出力してください。挨拶やMarkdownの解説は一切禁止します。
+9. 【超重要・構文エラー防止制約】
+・出力前に、すべての「"」や「,」、および「:」がJSONの構文として正しく配置されているかセルフチェックしてください。
+・解説（e）の中に含める「掘り下げ用プロンプト」の文字列内で、さらに「"（ダブルクォーテーション）」を使用することは、ネストによる構文崩れの原因となるため「禁止」とします。必要な場合は「'（シングルクォーテーション）」や「「」」で代用してください。
+【出力フォーマット】
+[
+  {
+    "subj": "数学Ⅱ・B・C", 
+    "sid": "m2bc",
+    "icon": "📊",
+    "units": [
+      {
+        "id": "m2bc-1",
+        "name": "三角関数・指数対数",
+        "qs": [
+          {
+            "q": "問題文をここに記述（改行は\\n）",
+            "h": "ヒント文",
+            "cs": ["選択肢0", "選択肢1", "選択肢2", "選択肢3"],
+            "a": 0,
+            "e": "解説文"
+          }
+        ]
+      }
+    ]
+  }
+]
+`;
+  navigator.clipboard.writeText(promptText).then(() => {
+    alert('Gemini用のデータ追加依頼プロンプトをクリップボードにコピーしました！\nこれをそのままAIチャットに貼り付けてください。');
+  });
+}
+
+function importAddon() {
+  const input = document.getElementById('dev-input').value.trim();
+  if(!input) { alert('テキストエリアが空です。'); return; }
+  try {
+    const newData = JSON.parse(input);
+    if(!Array.isArray(newData)) { alert('JSONは配列形式である必要があります。'); return; }
+
+    newData.forEach(newSubj => {
+      let matchSubj = appData.find(s => s.sid === newSubj.sid);
+      if(!matchSubj) {
+        // 新しい科目の場合はそのまま追加
+        appData.push(newSubj);
+      } else {
+        // 既存の科目の場合は単元をループ
+        newSubj.units.forEach(newUnit => {
+          let matchUnit = matchSubj.units.find(u => u.id === newUnit.id);
+          if(!matchUnit) {
+            // 新しい単元なら追加
+            matchSubj.units.push(newUnit);
+          } else {
+            // 既存の単元IDなら問題を統合（重複防止）
+            newUnit.qs.forEach(q => {
+              if(!matchUnit.qs.some(existQ => existQ.q === q.q)) {
+                matchUnit.qs.push(q);
+              }
+            });
+          }
+        });
+      }
+    });
+
+    saveState();
+    renderHome();
+    document.getElementById('dev-input').value = '';
+    alert('⚡ アドオンデータのマージに成功しました！マップに新しい単元が即時反映されています。');
+  } catch(e) {
+    alert('JSONの解析に失敗しました。フォーマットが正しいか確認してください。\nエラー詳細: ' + e.message);
+  }
+}
+
+function resetAllData() {
+  if(confirm('演習スコアおよび追加したアドオン単元をすべて消去し、初期状態に戻しますか？')) {
+    localStorage.removeItem('kyotsu80_state_v2');
+    localStorage.removeItem('kyotsu80_addons_v2');
+    st = {lv:1,exp:0,scores:{},history:[]};
+    appData = DEFAULT_DATA;
+    saveState();
+    renderHome();
+    alert('初期化しました。');
+  }
+}
+
+renderHome();
+</script>
+</body>
+</html>
